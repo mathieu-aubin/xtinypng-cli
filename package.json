@@ -32,6 +32,6 @@
     "jshint": "^2.9.1"
   },
   "scripts": {
-    "test": "jshint tinypng-cli.js && eslint tinypng-cli.js"
+    "test": "jshint xtinypng-cli.js && eslint xtinypng-cli.js"
   }
 }

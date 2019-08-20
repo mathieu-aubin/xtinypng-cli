@@ -3,7 +3,7 @@
   "version": "0.0.8",
   "description": "Handy command line tool for shrinking PNG images using the TinyPNG API",
   "homepage": "https://github.com/mathieu-aubin/xtinypng-cli",
-  "author": "websperts <hello@websperts.com>",
+  "author": "oldfart <oldfart@zeroserieux.com>",
   "repository": {
     "type": "git",
     "url": "git@github.com:mathieu-aubin/xtinypng-cli.git"

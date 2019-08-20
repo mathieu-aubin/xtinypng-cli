@@ -8,7 +8,8 @@
 
 ## Preamble
 
-To use xTinyPNG CLI, you need an API key for TinyPNG. You can get one at [https://tinypng.com/developers](https://tinypng.com/developers).
+To use xTinyPNG CLI, you need an API key for TinyPNG.
+You can get one from [_TinyPNG's Website_](https://tinypng.com/developers).
 
 ## Usage
 
@@ -16,16 +17,16 @@ xTinyPNG CLI allows you to provide your API key in two different ways. The more 
 
 	tinypng demo.png -k E99a18c4f8cb3EL5f2l08u368_922e03
 
-To shrink all PNG images within the current directory, you may run one of the following commands—both do exactly the same.
+To shrink all PNG/JPEG images within the current directory, you may run one of the following commands—both do exactly the same.
 
 	tinypng
 	tinypng .
 
-To shrink all PNG images within the current directory and subdirectoies, use the `-r` flag
+To shrink all PNG/JPEG images within the current directory and subdirectoies, use the `-r` flag
 
 	tinypng -r
 
-To shrink all PNG images within a specific directory (`assets/img` in this example), you may run the following command.
+To shrink all PNG/JPEG images within a specific directory (`assets/img` in this example), you may run the following command.
 
 	tinypng assets/img
 
@@ -33,7 +34,7 @@ You may also provide multiple directories.
 
 	tinypng assets/img1 assets/img2
 
-To shrink a single PNG image (`assets/img/demo.png` in this example), you may run the following command.
+To shrink a single PNG/JPEG image (`assets/img/demo.png` in this example), you may run the following command.
 
 	tinypng assets/img/demo.png
 

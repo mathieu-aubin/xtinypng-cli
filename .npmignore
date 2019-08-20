@@ -4,3 +4,6 @@
 .Trashes
 node_modules
 npm-debug.log
+*.jpg
+*.png
+*.webp

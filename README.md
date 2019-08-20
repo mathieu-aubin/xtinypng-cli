@@ -52,6 +52,8 @@ That's it. Pretty easy, huh?
 
 ## Changelog
 
+* 0.0.9
+	* Implement resize method
 * 0.0.8
 	* Modded version
 * 0.0.7

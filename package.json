@@ -1,6 +1,6 @@
 {
   "name": "xtinypng-cli",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Handy command line tool for shrinking PNG images using the TinyPNG API",
   "homepage": "https://github.com/mathieu-aubin/xtinypng-cli",
   "author": "oldfart <oldfart@zeroserieux.com>",
@@ -15,20 +15,21 @@
   "main": "xtinypng-cli.js",
   "license": "MIT",
   "dependencies": {
-    "array-uniq": "^1.0.2",
+    "array-uniq": "^2.1.0",
     "chalk": "^2.4.2",
-    "glob": "^7.0.3",
-    "minimatch": "^3.0.0",
+    "glob": "^7.1.4",
+    "minimatch": "^3.0.4",
     "minimist": "^1.2.0",
-    "prettysize": "0.0.3",
+    "prettysize": "^2.0.0",
     "request": "^2.88.0"
   },
   "preferGlobal": "true",
   "bin": {
-    "tinypng": "xtinypng-cli.js"
+    "tinypng": "xtinypng-cli.js",
+    "xtinypng": "xtinypng-cli.js"
   },
   "devDependencies": {
-    "eslint": ">=4.18.2",
+    "eslint": "2.7.0",
     "jshint": "^2.9.1"
   },
   "scripts": {

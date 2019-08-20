@@ -1,6 +1,6 @@
 {
   "name": "xtinypng-cli",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "Handy command line tool for shrinking PNG images using the TinyPNG API",
   "homepage": "https://github.com/mathieu-aubin/xtinypng-cli",
   "author": "oldfart <oldfart@zeroserieux.com>",
@@ -21,7 +21,8 @@
     "minimatch": "^3.0.4",
     "minimist": "^1.2.0",
     "prettysize": "^2.0.0",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "request-to-curl": "^0.1.4"
   },
   "preferGlobal": "true",
   "bin": {

@@ -52,6 +52,10 @@ That's it. Pretty easy, huh?
 
 ## Changelog
 
+* 0.1.0
+	* Multiple comments
+	* Uses env variables for key
+	* refactor help and add tinypng.com links
 * 0.0.9
 	* Implement resize method
 * 0.0.8
@@ -71,25 +75,3 @@ That's it. Pretty easy, huh?
 	* JP(E)G support
 * 0.0.1
 	* Initial version
-
-## TODO
-
-- Documentation
-- Tests
-
-## License
-
-Copyright (c) 2017 [websperts](http://websperts.com/)  
-Licensed under the MIT license.
-
-See LICENSE for more info.
-
-## Contributors
-
-- [@rasshofer](https://github.com/rasshofer)
-- [@maxkueng](https://github.com/maxkueng)
-- [@tholu](https://github.com/tholu)
-- [@mvenghaus](https://github.com/mvenghaus)
-- [@jblok](https://github.com/jblok)
-- [@tomatolicious](https://github.com/tomatolicious)
-- [@kolya182](https://github.com/kolya182)

@@ -86,7 +86,7 @@ if (argv.v || argv.version) {
 
 } else {
 
-  log(chalk.underline.bold('TinyPNG CLI'));
+  log(chalk.underline.bold('xTinyPNG CLI'));
   log('v' + version + '\n');
 
   var files = argv._.length ? argv._ : ['.'];
@@ -210,7 +210,7 @@ if (argv.v || argv.version) {
 
           if (!error && response) {
 
-            log(chalk.gray(pretty(JSON.stringify(response)) + '\n'));
+            log(chalk.gray(JSON.stringify(response) + '\n'));
 
             if (response.statusCode === 201) {
 

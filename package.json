@@ -30,7 +30,7 @@
     "xtinypng": "xtinypng-cli.js"
   },
   "devDependencies": {
-    "eslint": "2.7.0",
+    "eslint": ">=4.18.2",
     "jshint": "^2.9.1"
   },
   "scripts": {

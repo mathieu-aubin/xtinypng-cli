@@ -116,12 +116,12 @@ if (argv.v || argv.version) {
 		key = typeof(argv.k || argv.key) === 'string' ? (argv.k || argv.key).trim() : '';
 
 	// If either file exist ~/.tinypng OR ~/.xtinypng
-	} else if ( fs.existsSync(home + '/.tinypng') || fs.existsSync(home + '/.xtinypng') )
+	} else if ( fs.existsSync(home + '/.tinypng') || fs.existsSync(home + '/.xtinypng') ) {
 
 		key = fs.readFileSync(home + '/.tinypng', 'utf8').trim() || fs.readFileSync(home + '/.xtinypng', 'utf8').trim();
 
 	// If environment variables exist TINIFY_KEY (compat. with 'tinify' app), XTINYPNG_KEY, TINYPNG_KEY
-	} else if ( process.env.TINIFY_KEY || process.env.XTINYPNG_KEY || process.env.TINYPNG_KEY )
+	} else if ( process.env.TINIFY_KEY || process.env.XTINYPNG_KEY || process.env.TINYPNG_KEY ) {
 
 		key = process.env.TINIFY_KEY || process.env.XTINYPNG_KEY || process.env.TINYPNG_KEY;
 	}
@@ -161,7 +161,7 @@ if (argv.v || argv.version) {
 
 		if (typeof(argv.m || argv.method) === 'string') {
 
-			switch(argv.m || argv.method).trim() {
+			switch(argv.m || argv.method) {
 
 				case 'fit':
 

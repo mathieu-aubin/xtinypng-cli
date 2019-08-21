@@ -21,8 +21,7 @@
     "minimatch": "^3.0.4",
     "minimist": "^1.2.0",
     "prettysize": "^2.0.0",
-    "request": "^2.88.0",
-    "request-to-curl": "^0.1.4"
+    "request": "^2.88.0"
   },
   "preferGlobal": "true",
   "bin": {
@@ -31,7 +30,8 @@
   },
   "devDependencies": {
     "eslint": ">=4.18.2",
-    "jshint": "^2.9.1"
+    "jshint": "^2.9.1",
+    "request-to-curl": "^0.1.4"
   },
   "scripts": {
     "test": "jshint xtinypng-cli.js && eslint xtinypng-cli.js"

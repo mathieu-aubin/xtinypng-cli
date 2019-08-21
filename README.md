@@ -9,53 +9,67 @@
 ## Preamble
 
 To use xTinyPNG CLI, you need an API key for TinyPNG.
-You can get one from [_TinyPNG's Website_](https://tinypng.com/developers).
+You can get one from [_TinyPNG's Website_](https://bit.ly/tinypng-devel).
 
 ## Usage
 
-xTinyPNG CLI allows you to provide your API key in two different ways. The more convenient one is to save the API key into a file called `.tinypng` within your home directory. The other way is to provide it as an option while running the CLI.
+xTinyPNG CLI allows you to provide your API key in three different ways.
+	- The more convenient method is to use environment variables `XTINYPNG_KEY`, `TINYPNG_KEY` or `TINIFY_KEY` (for compatibility with Tinify).
+	- Secondly, save your API key into a file called `.xtinypng` or `.tinypng` within your home directory.
+	- Lastly and none the least, provide the API key straight as a CLI argument `-k`.
 
-	tinypng demo.png -k E99a18c4f8cb3EL5f2l08u368_922e03
+	xtinypng demo.png -k E99a18c4f8cb3EL5f2l08u368_922e03
 
-To shrink all PNG/JPEG images within the current directory, you may run one of the following commands—both do exactly the same.
+To shrink all PNG/JPEG images within the current directory, you may run one of the following commands -- both do exactly the same.
 
-	tinypng
-	tinypng .
+	xtinypng
+	xtinypng .
 
 To shrink all PNG/JPEG images within the current directory and subdirectoies, use the `-r` flag
 
-	tinypng -r
+	xtinypng -r
 
 To shrink all PNG/JPEG images within a specific directory (`assets/img` in this example), you may run the following command.
 
-	tinypng assets/img
+	xtinypng assets/img
 
 You may also provide multiple directories.
 
-	tinypng assets/img1 assets/img2
+	xtinypng assets/img1 assets/img2
 
 To shrink a single PNG/JPEG image (`assets/img/demo.png` in this example), you may run the following command.
 
-	tinypng assets/img/demo.png
+	xtinypng assets/img/demo.png
 
-You may also provide multiple single PNG images.
+You may also provide multiple single PNG/JPEG files.
 
-	tinypng assets/img/demo1.png assets/img/demo2.png
+	xtinypng assets/img/demo1.png assets/img/demo2.png
 
-To resize an image, use the `--width` and/or `--height` flag.
+To resize images, use the `--width` and/or `--height` flag.
 
-	tinypng assets/img/demo.png --width 123
-	tinypng assets/img/demo.png --height 123
-	tinypng assets/img/demo.png --width 123 --height 123
+	xtinypng assets/img/demo.png --width 123
+	xtinypng assets/img/demo.png --height 123
+	xtinypng assets/img/demo.png --width 123 --height 123 
 
-That's it. Pretty easy, huh?
+To use a resize method while resizing images, use the `--width` and/or `--height` flag.
+
+	xtinypng assets/img/demo.png -W 200 -H 140 -m fit
+
+More about resizing/resizing methods on [_TinyPNG's Website_](https://bit.ly/tinypng-ref-resizing)
+
+
+Please check the help for more explanations
+
 
 ## Changelog
 
 * 0.1.0
 	* Multiple comments
-	* Uses env variables for key
-	* refactor help and add tinypng.com links
+	* Uses env variables for keys
+	* Refactor help and add tinypng.com links
+	* Sends DNT:1 headers with the requests
+	* Sends A custom User-Agent header with the requests
+	* Displays compression-count after each compressions
 * 0.0.9
 	* Implement resize method
 * 0.0.8

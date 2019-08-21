@@ -7,9 +7,12 @@ var glob = require('glob');
 var uniq = require('array-uniq');
 var chalk = require('chalk');
 var pretty = require('prettysize');
+// If needed to output the request to curl
+// require('request-to-curl');
 
 var argv = require('minimist')(process.argv.slice(2));
 var home = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+
 var version = require('./package.json').version;
 
 const log = console.log;
@@ -120,7 +123,7 @@ if (argv.v || argv.version) {
 
 		key = fs.readFileSync(home + '/.tinypng', 'utf8').trim() || fs.readFileSync(home + '/.xtinypng', 'utf8').trim();
 
-	// If environment variables exist TINIFY_KEY (compat. with 'tinify' app), XTINYPNG_KEY, TINYPNG_KEY
+	// If env variables exist TINIFY_KEY (for compat. with 'tinify' app), XTINYPNG_KEY, TINYPNG_KEY
 	} else if ( process.env.TINIFY_KEY || process.env.XTINYPNG_KEY || process.env.TINYPNG_KEY ) {
 
 		key = process.env.TINIFY_KEY || process.env.XTINYPNG_KEY || process.env.TINYPNG_KEY;
@@ -167,10 +170,8 @@ if (argv.v || argv.version) {
 
 					resize.method = 'fit';
 					if (rcount !== 2) {
-
 						log(chalk.bold.red('Both height (-H) AND width (-W) must be specified when using resize method ' + resize.method + '.'));
 						return;
-
 					}
 
 					break;
@@ -179,10 +180,8 @@ if (argv.v || argv.version) {
 
 					resize.method = 'cover';
 					if (rcount !== 2) {
-
 						log(chalk.bold.red('Both height (-H) AND width (-W) must be specified when using resize method ' + resize.method + '.'));
 						return;
-
 					}
 
 					break;
@@ -191,10 +190,8 @@ if (argv.v || argv.version) {
 
 					resize.method = 'scale';
 					if (rcount !== 1) {
-
 						log(chalk.bold.red('Either height (-H) OR width (-W) must be used when using resize method ' + resize.method + '.'));
 						return;
-
 					}
 
 					break;
@@ -203,9 +200,7 @@ if (argv.v || argv.version) {
 
 					resize.method = 'thumb';
 					if (rcount !== 2) {
-
 						log(chalk.bold.red('Both height (-H) AND width (-W) must be specified when using resize method ' + resize.method + '.'));
-
 					}
 
 					break;
@@ -213,9 +208,7 @@ if (argv.v || argv.version) {
 
 					resize.method = '';
 					if (rcount <= 1) {
-
 						log(chalk.bold.red('Either height (-H) OR width (-W) must be used when resizing.'));
-
 					}
 
 					break;
@@ -224,9 +217,9 @@ if (argv.v || argv.version) {
 	}
 
 	// Echo the method used
-	if (typeof(resize.method) !== 'undefined') {
-		log(chalk.bold.red('\nMETHOD: ' + resize.method + '\n'));
-	}
+	//if (typeof(resize.method) !== 'undefined') {
+	//	log(chalk.bold.red('\nMETHOD: ' + resize.method + '\n'));
+	//}
 
 	// Check for API key lenght
 	if (key.length === 0) {
@@ -237,7 +230,7 @@ if (argv.v || argv.version) {
 	// Found api key
 	} else {
 		// Show api key
-		log(chalk.bold.gray('API key: ' + key + '\n'));
+		log(chalk.bold.gray.dim('API key: ' + key + '\n'));
 
 		var images = [];
 
@@ -265,13 +258,33 @@ if (argv.v || argv.version) {
 
 			log(chalk.bold.green('\u2714 Processing ' + unique.length + ' image' + (unique.length === 1 ? '' : 's')) + '...\n');
 
+			//request.post.defaults({
+			//		headers: {
+			//			'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0',
+			//			'DNT': 1
+			//		}
+			//});
+
 			unique.forEach(function(file) {
 
-				fs.createReadStream(file).pipe(request.post('https://api.tinify.com/shrink', {
-					auth: {
-						'user': 'api',
-						'pass': key
-					}
+				//fs.createReadStream(file).pipe(request.post('https://api.tinify.com/shrink', {
+				//	auth: { 'user': 'api', 'pass': key },
+				//	headers: { DNT: 1, 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0' }
+				//}, function(error, response, body) {
+
+				fs.createReadStream(file).pipe(request.post({
+
+						url: 'https://api.tinify.com/shrink',
+
+						auth: {
+							'user': 'api',
+							'pass': key
+						},
+
+						headers: {
+							'DNT': 1,
+							'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0'
+						}
 
 				}, function(error, response, body) {
 
@@ -279,8 +292,6 @@ if (argv.v || argv.version) {
 					// MUST include/require "request-to-curl" and...
 					// WATCHOUT!!! LOTS of data as it will output ALL your image data
 					//
-
-					// require('request-to-curl');
 					// log(response.request.req.toCurl());
 
 					try {
@@ -292,7 +303,7 @@ if (argv.v || argv.version) {
 
 					if (!error && response) {
 
-						log(chalk.gray(JSON.stringify(response) + '\n'));
+						log(chalk.gray.dim(JSON.stringify(response) + '\n'));
 
 						if (response.statusCode === 201) {
 
@@ -308,20 +319,30 @@ if (argv.v || argv.version) {
 								//	- <= 400 - ORANGE -> WARNING
 								//	-  > 401 - RED    -> CAUTION
 								//
+								// IDEA: maybe some sort of htop-like meter ?
+								//
 								if (typeof(response.headers['compression-count']) != 'undefined') {
 
 									if (response.headers['compression-count'] <= 250) {
+
 										// GREEN (SAFE)
-										log(chalk.bold('\u2611') + chalk.gray(' Compression-Count: ' + chalk.bold.green(response.headers['compression-count'] + '\n')));
+										log(chalk.bold.green('\u2139') + chalk.gray(' Compression-Count -> ') + chalk.bold.green(response.headers['compression-count']) + '\n');
+
 									} else if (response.headers['compression-count'] <= 300) {
+
 										// YELLOW (NOTICE)
-										log(chalk.bold.yellow(chalk.bold('\u2139') + chalk.gray(' Compression-Count: ') + chalk.bold.yellow(response.headers['compression-count'] + '\n')));
+										log(chalk.bold.yellow('\u2139') + chalk.gray(' Compression-Count -> ') + chalk.bold.yellow(response.headers['compression-count']) + '\n');
+
 									} else if (response.headers['compression-count'] <= 400) {
+
 										// ORANGE (WARNING)
-										log(chalk.keyword('orange')(chalk.bold('\u2139') + chalk.gray(' Compression-Count: ') + chalk.keyword('orange')(chalk.bold(response.headers['compression-count'] + '\n'))));
+										log(chalk.keyword('orange').bold('\u2139') + chalk.gray(' Compression-Count -> ') + chalk.keyword('orange').bold(response.headers['compression-count']) + '\n');
+
 									} else {
+
 										// RED (CAUTION)
-										log(chalk.bold.red(chalk.bold('\u2139') + chalk.gray(' Compression-Count: ') + chalk.bold.red(response.headers['compression-count'] + '\n')));
+										log(chalk.bold.red('\u2139') + chalk.gray(' Compression-Count -> ') + chalk.bold.red(response.headers['compression-count']) + '\n');
+
 									}
 								}
 
@@ -329,13 +350,21 @@ if (argv.v || argv.version) {
 								if (resize.hasOwnProperty('height') || resize.hasOwnProperty('width')) {
 
 									request.get(body.output.url, {
+
 										auth: {
 											'user': 'api',
 											'pass': key
 										},
+
+										headers: {
+											'DNT': 1,
+											'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0'
+										},
+
 										json: {
 											'resize': resize
 										}
+
 									}).pipe(fs.createWriteStream(file));
 
 								} else {
@@ -344,10 +373,10 @@ if (argv.v || argv.version) {
 
 							} else {
 								// Image cannot be minified anymore
-								log(chalk.green('\u2714 ' + file + ' - Maxed-Out (this is ' + chalk.bold.green('\u2714 OK') + chalk.green(')') ));
+								log(chalk.brown('\u2714 ' + file + ' - Maxed-Out (this is ' + chalk.bold.green('\u2714 OK') + chalk.brown(')') ));
 							}
 
-						// Error management... somewhat
+						// Error management
 						} else {
 
 							if (body.error === 'TooManyRequests') {

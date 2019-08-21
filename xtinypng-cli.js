@@ -375,7 +375,7 @@ if (argv.v || argv.version) {
 
 							} else {
 								// Image cannot be minified anymore
-								log(chalk.brown('\u2714 ' + file + ' - Maxed-Out (this is ' + chalk.bold.green('\u2714 OK') + chalk.brown(')') ));
+								log(chalk.yellow.dim('\u2714 ' + file + ' - Maxed-Out (this is ' + chalk.bold.green('\u2714 OK') + chalk.reset.yellow.dim(')') ));
 							}
 
 						// Error management

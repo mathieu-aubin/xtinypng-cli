@@ -7,6 +7,7 @@ var glob = require('glob');
 var uniq = require('array-uniq');
 var chalk = require('chalk');
 var pretty = require('prettysize');
+
 // If needed to output the request to curl
 // require('request-to-curl');
 
@@ -65,7 +66,7 @@ if (argv.v || argv.version) {
 		'\n' +
 		'  scale (default) Scales down proportionally. EITHER a target width OR a target\n' +
 		'                  height must be declared but NOT BOTH. The image will have the\n' +
-		'                  provided/requested width OR height.\n' +
+		'                  provided/requested width OR height.This is the default method\n' +
 		'\n' +
 		'  thumb           A more advanced implementation of cover that also detects cut\n' +
 		'                  out images with  plain backgrounds.  The image scales down to\n' +
@@ -111,6 +112,7 @@ if (argv.v || argv.version) {
 
 	var key = '';
 	var resize = {};
+	var preserve = {};
 	var rcount = 0;
 
 	// If -k OR --key is defined

@@ -8,7 +8,16 @@
     "type": "git",
     "url": "git@github.com:mathieu-aubin/xtinypng-cli.git"
   },
-  "keywords": [],
+  "keywords": [
+    "tinypng",
+    "tiny",
+    "png",
+    "image",
+    "optimization",
+    "compression",
+    "minify",
+    "website"
+  ],
   "bugs": {
     "url": "https://github.com/mathieu-aubin/xtinypng-cli/issues"
   },

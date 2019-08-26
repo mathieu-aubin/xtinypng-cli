@@ -1,22 +1,40 @@
 {
   "name": "xtinypng-cli",
+  "nicename": "xTinyPNG CLI",
+  "shortname": "xtinypng",
   "version": "0.1.0",
-  "description": "Handy command line tool for shrinking PNG images using the TinyPNG API",
+  "description": "Handy command-line tool for shrinking PNG/JPG images using the TinyPNG API",
   "homepage": "https://github.com/mathieu-aubin/xtinypng-cli",
-  "author": "oldfart <oldfart@zeroserieux.com>",
+  "author": "Mathieu Aubin <mathieu@zeroserieux.com>",
   "repository": {
     "type": "git",
-    "url": "git@github.com:mathieu-aubin/xtinypng-cli.git"
+    "url": "https://github.com/mathieu-aubin/xtinypng-cli.git"
   },
   "keywords": [
     "tinypng",
-    "tiny",
+    "tinyjpg",
+    "tinify",
+    "panda",
     "png",
+    "jpg",
     "image",
+    "optimize",
     "optimization",
+    "optimise",
+    "optimisation",
+    "compress",
     "compression",
     "minify",
-    "website"
+    "website",
+    "pngquant",
+    "optipng",
+    "mozjpeg",
+    "pngcrush",
+    "imgoptim",
+    "gifsicles",
+    "resize",
+    "shrink",
+    "api"
   ],
   "bugs": {
     "url": "https://github.com/mathieu-aubin/xtinypng-cli/issues"
@@ -27,6 +45,7 @@
     "array-uniq": "^2.1.0",
     "chalk": "^2.4.2",
     "glob": "^7.1.4",
+    "is-empty-file": "^1.0.1",
     "minimatch": "^3.0.4",
     "minimist": "^1.2.0",
     "prettysize": "^2.0.0",
@@ -39,10 +58,12 @@
   },
   "devDependencies": {
     "eslint": ">=4.18.2",
-    "jshint": "^2.9.1",
+    "jshint": ">=2.9.1",
     "request-to-curl": "^0.1.4"
   },
   "scripts": {
-    "test": "jshint xtinypng-cli.js && eslint xtinypng-cli.js"
-  }
+    "test": "jshint xtinypng-cli.js && eslint xtinypng-cli.js",
+    "generate-manual": "rm -rf man; mkdir man; cp xtinypng-cli.js xtinypng-cli; help2man --name=xtinypng --section=1 --no-info --version-option=--manualversion --manual='xtinypng manual' --help-option=--manual xtinypng-cli | sed 's/DESCRIPTION/USAGE/g' | gzip -9 >man/xtinypng.1.gz; rm xtinypng-cli"
+  },
+  "man": [ "man/xtinypng.1.gz" ]
 }

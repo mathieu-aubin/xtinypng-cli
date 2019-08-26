@@ -7,6 +7,7 @@ var glob = require('glob');
 var uniq = require('array-uniq');
 var chalk = require('chalk');
 var pretty = require('prettysize');
+var isempty = require('is-empty-file');
 
 // If needed to output the request to curl
 // require('request-to-curl');
@@ -14,99 +15,109 @@ var pretty = require('prettysize');
 var argv = require('minimist')(process.argv.slice(2));
 var home = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
 
+var homepage = require('./package.json').homepage;
+var nicename = require('./package.json').nicename;
+var shortname = require('./package.json').shortname;
 var version = require('./package.json').version;
 
 const log = console.log;
 
 if (argv.v || argv.version) {
 
+	log(chalk.bold(nicename) + chalk.reset(' v' + version + '\n\n' + homepage));
+
+} else if (argv.manualversion) {
+
 	log(version);
 
-} else if (argv.h || argv.help) {
+} else if (argv.h || argv.help || argv.manual) {
+
+	// Show only for -h/--help toggles
+	if (argv.h || argv.help) {
+		log(chalk.underline(nicename + ' v' + version + '\n\n' ) + chalk.underline('Usage') + '\n');
+	}
 
 	log(
-		'Usage\n' +
+		'  ' + shortname + ' <options> <path|filename(s)>' + '\n' +
 		'\n' +
-		'   tinypng <options> <path|filename(s)>\n' +
-		'  xtinypng <options> <path|filename(s)>\n' +
+		chalk.underline('Options') + '\n' +
 		'\n' +
-		'Examples\n' +
+		'  -k,  --key          Provide an API key' + '\n' +
+		'  -r,  --recursive    Walk given directory recursively' + '\n' +
+		'  -H,  --heigh        Resize to a specified height' + '\n' +
+		'  -W,  --width        Resize to a specified width' + '\n' +
+		'  -m,  --method       Resize method { fit, cover, scale, thumb }' + '\n' +
+		'  -A,  --user-agent   Send a custom User-Agent with the request' + '\n' +
+		'  -v,  --version      Show installed version' + '\n' +
+		'  -md, --matchdot     Match/include dotfiles as source files' + '\n' +
+		'  -h,  --help         Show help' + '\n' +
 		'\n' +
-		'  # Process all images in current directory\n' +
-		'    xtinypng .\n' +
-		'  # Process all images in \'assets/img\' directory, recusively\n' +
-		'    xtinypng -r assets/img\n' +
-		'  # Process a single image\n' +
-		'    xtinypng assets/img/test.png\n' +
-		'  # Resize image to 120 width keeping proportions\n' +
-		'    xtinypng --width 120 assets/img/test.jpg\n' +
-		'  # Resize an image to 100x100 using \'thumb\' method\n' +
-		'    xtinypng -H 100 -W 100 --method thumb thumnail_360x360.png\n' +
+		chalk.underline('Examples') + '\n' +
 		'\n' +
-		'Options\n' +
+		'  # Process all images in current directory' + '\n' +
+		'    ' + shortname + ' .\n' +
+		'  # Process all images in \'assets/img\' directory, recusively' + '\n' +
+		'    ' + shortname + ' -r assets/img' + '\n' +
+		'  # Process a single image' + '\n' +
+		'    ' + shortname + ' assets/img/test.png' + '\n' +
+		'  # Resize image to 120 width keeping proportions' + '\n' +
+		'    ' + shortname + ' --width 120 assets/img/test.jpg' + '\n' +
+		'  # Resize an image to 100x100 using \'thumb\' method' + '\n' +
+		'    ' + shortname + ' -H 100 -W 100 --method thumb thumnail_360x360.png' + '\n' +
 		'\n' +
-		'  -k, --key        Provide an API key\n' +
-		'  -r, --recursive  Walk given directory recursively\n' +
-		'  -H, --heigh      Resize to a specified height\n' +
-		'  -W, --width      Resize to a specified width\n' +
-		'  -m, --method     Resize method { fit, cover, scale, thumb }\n' +
-		'  -v, --version    Show installed version\n' +
-		'  -h, --help       Show help\n' +
+		chalk.underline('Resizing Methods') + '\n' +
 		'\n' +
-		'Resizing Methods\n' +
+		'  fit             Scales down proportionally  so that it fits  within the given' + '\n' +
+		'                  dimensions. BOTH width AND height must be declared. The image' + '\n' +
+		'                  will not exceed either of these dimensions.' + '\n' +
 		'\n' +
-		'  fit             Scales down proportionally  so that it fits  within the given\n' +
-		'                  dimensions. BOTH width AND height must be declared. The image\n' +
-		'                  will not exceed either of these dimensions.\n' +
+		'  cover           Scales image proportionally and crops if  necessary so result' + '\n' +
+		'                  has exactly the given  dimensions. BOTH width AND height must' + '\n' +
+		'                  be declared.Smart-crop algorithm determine the most important' + '\n' +
+		'                  areas of your image so cropping is automatic.' + '\n' +
 		'\n' +
-		'  cover           Scales image proportionally and crops if  necessary so result\n' +
-		'                  has exactly the given  dimensions. BOTH width AND height must\n' +
-		'                  be declared.Smart-crop algorithm determine the most important\n' +
-		'                  areas of your image so cropping is automatic.\n' +
+		'  scale (default) Scales down proportionally. EITHER a target width OR a target' + '\n' +
+		'                  height must be declared but NOT BOTH. The image will have the' + '\n' +
+		'                  provided/requested width OR height.This is the default method' + '\n' +
 		'\n' +
-		'  scale (default) Scales down proportionally. EITHER a target width OR a target\n' +
-		'                  height must be declared but NOT BOTH. The image will have the\n' +
-		'                  provided/requested width OR height.This is the default method\n' +
+		'  thumb           A more advanced implementation of cover that also detects cut' + '\n' +
+		'                  out images with  plain backgrounds.  The image scales down to' + '\n' +
+		'                  the width and height you provide. If image is detected with a' + '\n' +
+		'                  freestanding object it will add background space where needed' + '\n' +
+		'                  or crop the unimportant parts.BOTH width AND height required.' + '\n' +
 		'\n' +
-		'  thumb           A more advanced implementation of cover that also detects cut\n' +
-		'                  out images with  plain backgrounds.  The image scales down to\n' +
-		'                  the width and height you provide. If image is detected with a\n' +
-		'                  freestanding object it will add background space where needed\n' +
-		'                  or crop the unimportant parts.BOTH width AND height required.\n' +
+		chalk.underline('Resizing Note') + '\n' +
 		'\n' +
-		'Resizing Note\n' +
+		'  If the  target dimensions are  larger than the original dimensions, the image' + '\n' +
+		'  will NOT be scaled up. Scaling up is prevented to protect the images quality.' + '\n' +
 		'\n' +
-		'  If the  target dimensions are  larger than the original dimensions, the image\n' +
-		'  will NOT be scaled up. Scaling up is prevented to protect the images quality.\n' +
-		'\n' +
-		'  More about resizing/resizing methods at https://bit.ly/tinypng-ref-resizing\n'
+		'  More about resizing and resizing methods at https://bit.ly/tinypng-ref-resizing' + '\n'
 
 		// TODO: Future function to preserve metadata
-		//'  -p, --preserve   Preserve metadata: { copyright, creation, location }\n' +
+		//'  -p, --preserve   Preserve metadata: { copyright, creation, location }' + '\n' +
 		//'\n' +
-		//'Preserving metadata\n' +
+		//'Preserving metadata' + '\n' +
 		//'\n' +
-		//'  all               Preserves all possible metadata.\n' +
+		//'  all               Preserves all possible metadata.' + '\n' +
 		//'\n' +
-		//'  copyright         Preserves any copyright information. This includes the EXIF\n' +
-		//'                    copyright tag (JPEG), the XMP rights tag (PNG) as well as a\n' +
-		//'                    Photoshop copyright  flag or URL. Uses  up to 90 additional\n' +
-		//'                    bytes, plus the length of the copyright data.\n' +
+		//'  copyright         Preserves any copyright information. This includes the EXIF' + '\n' +
+		//'                    copyright tag (JPEG), the XMP rights tag (PNG) as well as a' + '\n' +
+		//'                    Photoshop copyright  flag or URL. Uses  up to 90 additional' + '\n' +
+		//'                    bytes, plus the length of the copyright data.' + '\n' +
 		//'\n' +
-		//'  creation          Preserves any creation date or time. This is the moment the\n' +
-		//'                    image/photo was originally created.  This includes the EXIF\n' +
-		//'                    original date time tag (JPEG)/XMP creation time (PNG). Uses\n' +
-		//'                    around 70 additional bytes.\n' +
+		//'  creation          Preserves any creation date or time. This is the moment the' + '\n' +
+		//'                    image/photo was originally created.  This includes the EXIF' + '\n' +
+		//'                    original date time tag (JPEG)/XMP creation time (PNG). Uses' + '\n' +
+		//'                    around 70 additional bytes.' + '\n' +
 		//'\n' +
-		//'  location (JPEG)   Preserves any GPS location  data describing where the photo\n' +
-		//'                    was taken. This includes the EXIF GPS lat/long tags (JPEG).\n' +
-		//'                    Uses around 130 additional bytes.\n'
+		//'  location (JPEG)   Preserves any GPS location  data describing where the photo' + '\n' +
+		//'                    was taken. This includes the EXIF GPS lat/long tags (JPEG).' + '\n' +
+		//'                    Uses around 130 additional bytes.' + '\n'
 	);
 
 } else {
 
-	log(chalk.underline.bold('xTinyPNG CLI'));
-	log('v' + version + '\n');
+	log(chalk.bold(nicename) + chalk.reset(' v' + version + '\n'));
 
 	var files = argv._.length ? argv._ : ['.'];
 
@@ -115,34 +126,45 @@ if (argv.v || argv.version) {
 	var preserve = {};
 	var rcount = 0;
 
+/////////////////////////////////////
+
+	// Match options for minimatch
+	var matchopts = {matchBase: true, dot: false, debug: false}
+//	matchopts.dot = false;
+//	matchopts.debug = true;
+//	matchopts.matchBase = true;
+
+	// Define if dotfiles match
+	// Added the -f/--force option but will not yet add it to help.
+	// I think there is more to come for that forcible option...
+	if (argv.md || argv.matchdot || argv.f || argv.force) { matchopts.dot = true; }
+
+/////////////////////////////////////
+
 	// If -k OR --key is defined
 	if (argv.k || argv.key) {
 
 		key = typeof(argv.k || argv.key) === 'string' ? (argv.k || argv.key).trim() : '';
 
 	// If either file exist ~/.tinypng OR ~/.xtinypng
-	} else if ( fs.existsSync(home + '/.tinypng') || fs.existsSync(home + '/.xtinypng') ) {
+	} else if ( fs.existsSync(home + '/.xtinypng') || fs.existsSync(home + '/.tinypng') ) {
 
-		key = fs.readFileSync(home + '/.tinypng', 'utf8').trim() || fs.readFileSync(home + '/.xtinypng', 'utf8').trim();
+		key = (fs.readFileSync(home + '/.xtinypng', 'utf8') || fs.readFileSync(home + '/.tinypng', 'utf8')).trim();
 
 	// If env variables exist TINIFY_KEY (for compat. with 'tinify' app), XTINYPNG_KEY, TINYPNG_KEY
 	} else if ( process.env.TINIFY_KEY || process.env.XTINYPNG_KEY || process.env.TINYPNG_KEY ) {
 
-		key = process.env.TINIFY_KEY || process.env.XTINYPNG_KEY || process.env.TINYPNG_KEY;
+		key = (process.env.TINIFY_KEY || process.env.XTINYPNG_KEY || process.env.TINYPNG_KEY).trim();
 	}
 
 	// Define resize width variable
 	if (argv.W || argv.width) {
-
 		if (typeof(argv.W || argv.width) === 'number') {
-
 			resize.width = (argv.W || argv.width);
+			// Increase counter for resize arguments
 			rcount++;
-
 		} else {
-
 			log(chalk.bold.red('Invalid resize width.'));
-
 		}
 	}
 
@@ -150,29 +172,28 @@ if (argv.v || argv.version) {
 	if (argv.H || argv.height) {
 
 		if (typeof(argv.H || argv.height) === 'number') {
-
 			resize.height = (argv.H || argv.height);
+			// Increase counter for resize arguments
 			rcount++;
-
 		} else {
-
 			log(chalk.bold.red('Invalid resize height.'));
-
 		}
 	}
+
 
 	// Define resize method variable
 	if (argv.m || argv.method) {
 
 		if (typeof(argv.m || argv.method) === 'string') {
 
+			// Select case resizing method
 			switch(argv.m || argv.method) {
 
 				case 'fit':
 
 					resize.method = 'fit';
 					if (rcount !== 2) {
-						log(chalk.bold.red('Both height (-H) AND width (-W) must be specified when using resize method ' + resize.method + '.'));
+						log(chalk.bold.red('Both height (-H/--height) AND width (-W/--width) values must be specified when using resize method ' + resize.method + '.'));
 						return;
 					}
 
@@ -182,7 +203,7 @@ if (argv.v || argv.version) {
 
 					resize.method = 'cover';
 					if (rcount !== 2) {
-						log(chalk.bold.red('Both height (-H) AND width (-W) must be specified when using resize method ' + resize.method + '.'));
+						log(chalk.bold.red('Both height (-H/--height) AND width (-W/--width) values must be specified when using resize method ' + resize.method + '.'));
 						return;
 					}
 
@@ -192,7 +213,7 @@ if (argv.v || argv.version) {
 
 					resize.method = 'scale';
 					if (rcount !== 1) {
-						log(chalk.bold.red('Either height (-H) OR width (-W) must be used when using resize method ' + resize.method + '.'));
+						log(chalk.bold.red('Either a height (-H/--height) OR width (-W/--width) value must be used when using resize method ' + resize.method + '.'));
 						return;
 					}
 
@@ -202,15 +223,17 @@ if (argv.v || argv.version) {
 
 					resize.method = 'thumb';
 					if (rcount !== 2) {
-						log(chalk.bold.red('Both height (-H) AND width (-W) must be specified when using resize method ' + resize.method + '.'));
+						log(chalk.bold.red('Both height (-H/--height) AND width (-W/--width) values must be specified when using resize method ' + resize.method + '.'));
+						return;
 					}
 
 					break;
 				default:
 
 					resize.method = '';
-					if (rcount <= 1) {
-						log(chalk.bold.red('Either height (-H) OR width (-W) must be used when resizing.'));
+					if (rcount < 1) {
+						log(chalk.bold.red('Either a height (-H/--height) OR width (-W/--width) value must be used when resizing.'));
+						return;
 					}
 
 					break;
@@ -218,10 +241,15 @@ if (argv.v || argv.version) {
 		}
 	}
 
-	// Echo the method used
-	//if (typeof(resize.method) !== 'undefined') {
-	//	log(chalk.bold.red('\nMETHOD: ' + resize.method + '\n'));
-	//}
+	// Define user-agent variable
+	var useragent = 'Mozilla/5.0 (X11; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0';
+	if (argv.A || argv['user-agent']) {
+		if (typeof(argv.A || argv['user-agent']) === 'string') {
+			useragent = ((argv.A || argv['user-agent']).replace(/\"|\'/g, '')).trim();
+		}
+	}
+
+	// log(chalk.bold.yellow('User-Agent: ' + useragent));
 
 	// Check for API key lenght
 	if (key.length === 0) {
@@ -229,10 +257,17 @@ if (argv.v || argv.version) {
 		// No api key...
 		log(chalk.bold.red('No API key.'));
 
+	// If key isnt 32 characters long
+	} else if (key.length != 32) {
+
+		// Wrong api key lenght (should be 32 chars)
+		log(chalk.bold.red('Invalid API key lenght (must be 32 characters).'));
+
 	// Found api key
 	} else {
+
 		// Show api key
-		log(chalk.bold.gray.dim('API key: ' + key + '\n'));
+		log(chalk.bold.gray.dim('API key: ' + chalk.gray.reset(key) + '\n'));
 
 		var images = [];
 
@@ -244,8 +279,13 @@ if (argv.v || argv.version) {
 
 					images = images.concat(glob.sync(file + (argv.r || argv.recursive ? '/**' : '') + '/*.+(png|jpg|jpeg|PNG|JPG|JPEG)'));
 
-				} else if (minimatch(file, '*.+(png|jpg|jpeg|PNG|JPG|JPEG)', {matchBase: true})) {
-					images.push(file);
+				} else if (minimatch(file, '*.+(png|jpg|jpeg|PNG|JPG|JPEG)', matchopts )) {
+					// Check if file is empty/null before sending
+					if (isempty(file, true)) {
+						log(chalk.bold.red.dim('\u2718 File ' + file + ' is empty (0 bytes), skipping...'));
+					} else {
+						images.push(file);
+					}
 				}
 			}
 		});
@@ -260,19 +300,7 @@ if (argv.v || argv.version) {
 
 			log(chalk.bold.green('\u2714 Processing ' + unique.length + ' image' + (unique.length === 1 ? '' : 's')) + '...\n');
 
-			//request.post.defaults({
-			//		headers: {
-			//			'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0',
-			//			'DNT': 1
-			//		}
-			//});
-
 			unique.forEach(function(file) {
-
-				//fs.createReadStream(file).pipe(request.post('https://api.tinify.com/shrink', {
-				//	auth: { 'user': 'api', 'pass': key },
-				//	headers: { DNT: 1, 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0' }
-				//}, function(error, response, body) {
 
 				fs.createReadStream(file).pipe(request.post({
 
@@ -285,15 +313,13 @@ if (argv.v || argv.version) {
 
 						headers: {
 							'DNT': 1,
-							'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0'
+							'User-Agent': useragent
 						}
 
 				}, function(error, response, body) {
 
 					//
-					// MUST include/require "request-to-curl" and...
 					// WATCHOUT!!! LOTS of data as it will output ALL your image data
-					//
 					// log(response.request.req.toCurl());
 
 					try {
@@ -360,7 +386,7 @@ if (argv.v || argv.version) {
 
 										headers: {
 											'DNT': 1,
-											'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0'
+											'User-Agent': useragent
 										},
 
 										json: {
@@ -406,9 +432,7 @@ if (argv.v || argv.version) {
 
 					// No response error
 					} else {
-
 						log(chalk.bold.red('\u2718 Got no response for ' + file));
-
 					}
 				}));
 			});

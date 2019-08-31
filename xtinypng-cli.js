@@ -386,7 +386,7 @@ if (argv.v || argv.version) {
 										},
 
 										json: {
-											'resize': resize,
+											'resize': resize
 										}
 
 									}).pipe(fs.createWriteStream(file));

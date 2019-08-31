@@ -8,3 +8,5 @@ npm-debug.log
 *.png
 *.webp
 /testfiles/**
+reset-testfiles.sh
+.editorconfig

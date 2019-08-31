@@ -2,7 +2,7 @@
   "name": "xtinypng-cli",
   "nicename": "xTinyPNG CLI",
   "shortname": "xtinypng",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Handy command-line tool for shrinking PNG/JPG images using the TinyPNG API",
   "homepage": "https://github.com/mathieu-aubin/xtinypng-cli",
   "author": "Mathieu Aubin <mathieu@zeroserieux.com>",

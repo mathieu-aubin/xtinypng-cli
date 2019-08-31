@@ -1,14 +1,14 @@
 #!/usr/bin/env node
+"use strict";
 
 var fs = require('fs');
-var request = require('request');
-var minimatch = require('minimatch');
 var glob = require('glob');
-var uniq = require('array-uniq');
 var chalk = require('chalk');
+var uniq = require('array-uniq');
+var request = require('request');
 var pretty = require('prettysize');
+var minimatch = require('minimatch');
 var isempty = require('is-empty-file');
-
 // If needed to output the request to curl
 // require('request-to-curl');
 
@@ -26,21 +26,17 @@ if (argv.v || argv.version) {
 
 	log(chalk.bold(nicename) + chalk.reset(' v' + version + '\n\n' + homepage));
 
-} else if (argv.manualversion) {
-
-	log(version);
-
 } else if (argv.h || argv.help || argv.manual) {
 
 	// Show only for -h/--help toggles
 	if (argv.h || argv.help) {
-		log(chalk.underline(nicename + ' v' + version + '\n\n' ) + chalk.underline('Usage') + '\n');
+		log(chalk.bold.underline(nicename + ' v' + version + '\n\n' ) + chalk.bold.underline('USAGE') + '\n');
 	}
 
 	log(
 		'  ' + shortname + ' <options> <path|filename(s)>' + '\n' +
 		'\n' +
-		chalk.underline('Options') + '\n' +
+		chalk.bold.underline('OPTIONS') + '\n' +
 		'\n' +
 		'  -k,  --key          Provide an API key' + '\n' +
 		'  -r,  --recursive    Walk given directory recursively' + '\n' +
@@ -52,7 +48,7 @@ if (argv.v || argv.version) {
 		'  -md, --matchdot     Match/include dotfiles as source files' + '\n' +
 		'  -h,  --help         Show help' + '\n' +
 		'\n' +
-		chalk.underline('Examples') + '\n' +
+		chalk.bold.underline('EXAMPLES') + '\n' +
 		'\n' +
 		'  # Process all images in current directory' + '\n' +
 		'    ' + shortname + ' .\n' +
@@ -65,7 +61,7 @@ if (argv.v || argv.version) {
 		'  # Resize an image to 100x100 using \'thumb\' method' + '\n' +
 		'    ' + shortname + ' -H 100 -W 100 --method thumb thumnail_360x360.png' + '\n' +
 		'\n' +
-		chalk.underline('Resizing Methods') + '\n' +
+		chalk.bold.underline('RESIZING METHODS') + '\n' +
 		'\n' +
 		'  fit             Scales down proportionally  so that it fits  within the given' + '\n' +
 		'                  dimensions. BOTH width AND height must be declared. The image' + '\n' +
@@ -86,7 +82,7 @@ if (argv.v || argv.version) {
 		'                  freestanding object it will add background space where needed' + '\n' +
 		'                  or crop the unimportant parts.BOTH width AND height required.' + '\n' +
 		'\n' +
-		chalk.underline('Resizing Note') + '\n' +
+		chalk.bold.underline('RESIZING NOTES') + '\n' +
 		'\n' +
 		'  If the  target dimensions are  larger than the original dimensions, the image' + '\n' +
 		'  will NOT be scaled up. Scaling up is prevented to protect the images quality.' + '\n' +
@@ -96,7 +92,7 @@ if (argv.v || argv.version) {
 		// TODO: Future function to preserve metadata
 		//'  -p, --preserve   Preserve metadata: { copyright, creation, location }' + '\n' +
 		//'\n' +
-		//'Preserving metadata' + '\n' +
+		//chalk.bold.underline('PRESERVING METADATA') + '\n' +
 		//'\n' +
 		//'  all               Preserves all possible metadata.' + '\n' +
 		//'\n' +
@@ -129,7 +125,7 @@ if (argv.v || argv.version) {
 /////////////////////////////////////
 
 	// Match options for minimatch
-	var matchopts = {matchBase: true, dot: false, debug: false}
+	var matchopts = {matchBase: true, dot: false, debug: false};
 //	matchopts.dot = false;
 //	matchopts.debug = true;
 //	matchopts.matchBase = true;
@@ -390,7 +386,7 @@ if (argv.v || argv.version) {
 										},
 
 										json: {
-											'resize': resize
+											'resize': resize,
 										}
 
 									}).pipe(fs.createWriteStream(file));

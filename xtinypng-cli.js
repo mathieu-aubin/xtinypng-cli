@@ -24,11 +24,12 @@ const log = console.log;
 
 if (argv.v || argv.version) {
 
+	// Show program infos, version, homepage...
 	log(chalk.bold(nicename) + chalk.reset(' v' + version + '\n\n' + homepage));
 
 } else if (argv.h || argv.help || argv.manual) {
 
-	// Show only for -h/--help toggles
+	// Show only for -h/--help toggles, not for --manual
 	if (argv.h || argv.help) {
 		log(chalk.bold.underline(nicename + ' v' + version + '\n\n' ) + chalk.bold.underline('USAGE') + '\n');
 	}
@@ -45,8 +46,15 @@ if (argv.v || argv.version) {
 		'  -m,  --method       Resize method { fit, cover, scale, thumb }' + '\n' +
 		'  -A,  --user-agent   Send a custom User-Agent with the request' + '\n' +
 		'  -v,  --version      Show installed version' + '\n' +
-		'  -md, --matchdot     Match/include dotfiles as source files' + '\n' +
+		'  -md, --matchdot     Include dot/hidden files as input' + '\n' +
 		'  -h,  --help         Show help' + '\n' +
+		'\n' +
+		chalk.bold.underline('PASSING YOUR API KEY') + '\n' +
+		'\n' +
+		'  This can be done a few different ways, including:' + '\n' +
+		'	- Using either -k or --key command-line options' + '\n' +
+		'	- Using dotfiles ~/.xtinypng or ~/.tinypng' + '\n' +
+		'	- Using env. variables XTINYPNG_KEY, TINYPNG_KEY, TINYFY_KEY' + '\n' +
 		'\n' +
 		chalk.bold.underline('EXAMPLES') + '\n' +
 		'\n' +
@@ -113,54 +121,96 @@ if (argv.v || argv.version) {
 
 } else {
 
+	// Show program infos
 	log(chalk.bold(nicename) + chalk.reset(' v' + version + '\n'));
 
-	var files = argv._.length ? argv._ : ['.'];
-
+	// Init some variables
 	var key = '';
 	var resize = {};
 	var preserve = {};
 	var rcount = 0;
 
+	// Set the files to be processed from input args or, by default, set to $PWD
+	var files = argv._.length ? argv._ : ['.'];
+
 /////////////////////////////////////
 
 	// Match options for minimatch
-	var matchopts = {matchBase: true, dot: false, debug: false};
-//	matchopts.dot = false;
-//	matchopts.debug = true;
-//	matchopts.matchBase = true;
+	//	matchopts.dot = false;
+	//	matchopts.debug = true;
+	//	matchopts.matchBase = true;
+	var matchopts = {
+		matchBase: true,
+		dot: false,
+		debug: false
+	};
 
-	// Define if dotfiles match
-	// Added the -f/--force option but will not yet add it to help.
-	// I think there is more to come for that forcible option...
-	if (argv.md || argv.matchdot || argv.f || argv.force) { matchopts.dot = true; }
+	// Define if dot/hidden files match
+	if (argv.md || argv.matchdot) {
+		matchopts.dot = true;
+	}
+
+	// Added the -f/--force option
+	// TODO: Add it to help when relevant/more options to force
+	// There might be to add when using the FORCE option.
+	if (argv.f || argv.force) {
+		matchopts.dot = true;
+	}
 
 /////////////////////////////////////
 
-	// If -k OR --key is defined
-	if (argv.k || argv.key) {
+	// Key input-check priority is as follow:
+	//	1- Command-line -k
+	//	2- Command-line --key
+	//	3- $HOME/.xtinypng
+	//	4- $HOME/.tinypng
+	//	5- ENV variable XTINYPNG_KEY
+	//	6- ENV variable TINYPNG_KEY
+	//	7- ENV variable TINYFY_KEY
 
-		key = typeof(argv.k || argv.key) === 'string' ? (argv.k || argv.key).trim() : '';
+	// If -k is defined
+	if (argv.k) {
 
-	// If either file exist ~/.tinypng OR ~/.xtinypng
-	} else if ( fs.existsSync(home + '/.xtinypng') || fs.existsSync(home + '/.tinypng') ) {
+		key = typeof(argv.k) === 'string' ? (argv.k).trim() : '';
 
-		key = (fs.readFileSync(home + '/.xtinypng', 'utf8') || fs.readFileSync(home + '/.tinypng', 'utf8')).trim();
+	// If --key is defined
+	} else if (argv.key) {
 
-	// If env variables exist TINIFY_KEY (for compat. with 'tinify' app), XTINYPNG_KEY, TINYPNG_KEY
-	} else if ( process.env.TINIFY_KEY || process.env.XTINYPNG_KEY || process.env.TINYPNG_KEY ) {
+		key = typeof(argv.key) === 'string' ? (argv.key).trim() : '';
 
-		key = (process.env.TINIFY_KEY || process.env.XTINYPNG_KEY || process.env.TINYPNG_KEY).trim();
+	// If file exist ~/.xtinypng
+	} else if (fs.existsSync(home + '/.xtinypng')) {
+
+		key = typeof(fs.readFileSync(home + '/.xtinypng', 'utf8')) === 'string' ? (fs.readFileSync(home + '/.xtinypng', 'utf8')).trim() : '';
+
+	// If file exist ~/.tinypng
+	} else if (fs.existsSync(home + '/.tinypng')) {
+
+		key = typeof(fs.readFileSync(home + '/.tinypng', 'utf8')) === 'string' ? (fs.readFileSync(home + '/.tinypng', 'utf8')).trim() : '';
+		//key = (fs.readFileSync(home + '/.tinypng', 'utf8')).trim();
+
+	// If ENV variable XTINYPNG_KEY exist
+	} else if (process.env.XTINYPNG_KEY || process.env.TINYPNG_KEY || process.env.TINYFY_KEY) {
+
+		if (process.env.XTINYPNG_KEY) {
+			key = typeof(process.env.XTINYPNG_KEY) === 'string' ? (process.env.XTINYPNG_KEY).trim() : '';
+		// If ENV variable TINYPNG_KEY exist
+		} else if (process.env.TINYPNG_KEY) {
+			key = typeof(process.env.TINYPNG_KEY) === 'string' ? (process.env.TINYPNG_KEY).trim() : '';
+		// If ENV variable TINYFY_KEY exist
+		} else if (process.env.TINYFY_KEY) {
+			key = typeof(process.env.TINYFY_KEY) === 'string' ? (process.env.TINYFY_KEY).trim() : '';
+		}
 	}
 
-	// Define resize width variable
+	// Define resize WIDTH variable
 	if (argv.W || argv.width) {
 		if (typeof(argv.W || argv.width) === 'number') {
 			resize.width = (argv.W || argv.width);
 			// Increase counter for resize arguments
 			rcount++;
 		} else {
-			log(chalk.bold.red('Invalid resize width.'));
+			log(chalk.bold.red('Invalid resize WIDTH.'));
 		}
 	}
 
@@ -172,7 +222,7 @@ if (argv.v || argv.version) {
 			// Increase counter for resize arguments
 			rcount++;
 		} else {
-			log(chalk.bold.red('Invalid resize height.'));
+			log(chalk.bold.red('Invalid resize HEIGHT.'));
 		}
 	}
 
@@ -189,7 +239,7 @@ if (argv.v || argv.version) {
 
 					resize.method = 'fit';
 					if (rcount !== 2) {
-						log(chalk.bold.red('Both height (-H/--height) AND width (-W/--width) values must be specified when using resize method ' + resize.method + '.'));
+						log(chalk.bold.red('Both HEIGHT (-H/--height) and WIDTH (-W/--width) values must be specified when using resize method ' + resize.method + '.'));
 						return;
 					}
 
@@ -199,7 +249,7 @@ if (argv.v || argv.version) {
 
 					resize.method = 'cover';
 					if (rcount !== 2) {
-						log(chalk.bold.red('Both height (-H/--height) AND width (-W/--width) values must be specified when using resize method ' + resize.method + '.'));
+						log(chalk.bold.red('Both HEIGHT (-H/--height) and WIDTH (-W/--width) values must be specified when using resize method ' + resize.method + '.'));
 						return;
 					}
 
@@ -209,7 +259,7 @@ if (argv.v || argv.version) {
 
 					resize.method = 'scale';
 					if (rcount !== 1) {
-						log(chalk.bold.red('Either a height (-H/--height) OR width (-W/--width) value must be used when using resize method ' + resize.method + '.'));
+						log(chalk.bold.red('Either a HEIGHT (-H/--height) or WIDTH (-W/--width) value must be used when using resize method ' + resize.method + '.'));
 						return;
 					}
 
@@ -219,7 +269,7 @@ if (argv.v || argv.version) {
 
 					resize.method = 'thumb';
 					if (rcount !== 2) {
-						log(chalk.bold.red('Both height (-H/--height) AND width (-W/--width) values must be specified when using resize method ' + resize.method + '.'));
+						log(chalk.bold.red('Both HEIGHT (-H/--height) and WIDTH (-W/--width) values must be specified when using resize method ' + resize.method + '.'));
 						return;
 					}
 
@@ -228,7 +278,7 @@ if (argv.v || argv.version) {
 
 					resize.method = '';
 					if (rcount < 1) {
-						log(chalk.bold.red('Either a height (-H/--height) OR width (-W/--width) value must be used when resizing.'));
+						log(chalk.bold.red('Either a HEIGHT (-H/--height) or WIDTH (-W/--width) value must be specified when resizing.'));
 						return;
 					}
 
@@ -237,12 +287,20 @@ if (argv.v || argv.version) {
 		}
 	}
 
-	// Define user-agent variable
-	var useragent = 'Mozilla/5.0 (X11; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0';
+	// Check if a User-Agent has been defined on command-line
 	if (argv.A || argv['user-agent']) {
-		if (typeof(argv.A || argv['user-agent']) === 'string') {
-			useragent = ((argv.A || argv['user-agent']).replace(/\"|\'/g, '')).trim();
+
+		if (typeof(argv.A) === 'string') {
+			useragent = ((argv.A).replace(/\"|\'/g, '')).trim();
+		} else if (typeof(argv['user-agent']) === 'string') {
+			useragent = ((argv['user-agent']).replace(/\"|\'/g, '')).trim();
 		}
+
+	} else {
+
+	// Define User-Agent variable (latest Firefox as of 2020/05/26)
+	var useragent = 'Mozilla/5.0 (X11; Linux x86_64; rv:76.0) Gecko/20100101 Firefox/76.0';
+
 	}
 
 	// log(chalk.bold.yellow('User-Agent: ' + useragent));
@@ -250,14 +308,14 @@ if (argv.v || argv.version) {
 	// Check for API key lenght
 	if (key.length === 0) {
 
-		// No api key...
+		// No API key...
 		log(chalk.bold.red('No API key.'));
 
 	// If key isnt 32 characters long
 	} else if (key.length != 32) {
 
 		// Wrong api key lenght (should be 32 chars)
-		log(chalk.bold.red('Invalid API key lenght (must be 32 characters).'));
+		log(chalk.bold.red('Invalid API key lenght.'));
 
 	// Found api key
 	} else {
@@ -275,7 +333,8 @@ if (argv.v || argv.version) {
 
 					images = images.concat(glob.sync(file + (argv.r || argv.recursive ? '/**' : '') + '/*.+(png|jpg|jpeg|PNG|JPG|JPEG)'));
 
-				} else if (minimatch(file, '*.+(png|jpg|jpeg|PNG|JPG|JPEG)', matchopts )) {
+				} else if (minimatch(file, '*.+(png|jpg|jpeg|PNG|JPG|JPEG)', matchopts)) {
+
 					// Check if file is empty/null before sending
 					if (isempty(file, true)) {
 						log(chalk.bold.red.dim('\u2718 File ' + file + ' is empty (0 bytes), skipping...'));
@@ -314,9 +373,10 @@ if (argv.v || argv.version) {
 
 				}, function(error, response, body) {
 
-					//
-					// WATCHOUT!!! LOTS of data as it will output ALL your image data
-					// log(response.request.req.toCurl());
+					// !!! WATCHOUT !!!
+					// 	This will output your image data (LOTS OF DATA)
+					// 	log(response.request.req.toCurl());
+					// !!! WATCHOUT !!!
 
 					try {
 						body = JSON.parse(body);
@@ -329,48 +389,45 @@ if (argv.v || argv.version) {
 
 						log(chalk.gray.dim(JSON.stringify(response) + '\n'));
 
+						// Status code 201, should be all good
 						if (response.statusCode === 201) {
 
 							if (body.output.size < body.input.size) {
 
 								log(chalk.green('\u2714 ' + file + ' - Shrunk ' + chalk.bold(pretty(body.input.size-body.output.size) + ' (' + Math.round(100-100/body.input.size*body.output.size)+'%)')));
 
-								// if compression-count is returned, output it using variable
+								// If compression-count is returned, output it using variable
 								// text color depending on amount of conversions already done
 								//
-								//	- <= 250 - GREEN  -> SAFE
-								//	- <= 300 - YELLOW -> NOTICE
-								//	- <= 400 - ORANGE -> WARNING
-								//	-  > 401 - RED    -> CAUTION
+								//	<= 325 - GREEN  -> SAFE
+								//	<= 375 - YELLOW -> NOTICE
+								//	<= 425 - ORANGE -> WARNING
+								//	>= 426 - RED    -> CAUTION
 								//
-								// IDEA: maybe some sort of htop-like meter ?
+								// IDEA: maybe some sort of HTOP-like meter?
 								//
 								if (typeof(response.headers['compression-count']) != 'undefined') {
 
-									if (response.headers['compression-count'] <= 250) {
-
+									if (response.headers['compression-count'] <= 325) {
 										// GREEN (SAFE)
 										log(chalk.bold.green('\u2139') + chalk.gray(' Compression-Count -> ') + chalk.bold.green(response.headers['compression-count']) + '\n');
 
-									} else if (response.headers['compression-count'] <= 300) {
-
+									} else if (response.headers['compression-count'] <= 375) {
 										// YELLOW (NOTICE)
 										log(chalk.bold.yellow('\u2139') + chalk.gray(' Compression-Count -> ') + chalk.bold.yellow(response.headers['compression-count']) + '\n');
 
-									} else if (response.headers['compression-count'] <= 400) {
-
+									} else if (response.headers['compression-count'] <= 425) {
 										// ORANGE (WARNING)
 										log(chalk.keyword('orange').bold('\u2139') + chalk.gray(' Compression-Count -> ') + chalk.keyword('orange').bold(response.headers['compression-count']) + '\n');
 
 									} else {
-
 										// RED (CAUTION)
 										log(chalk.bold.red('\u2139') + chalk.gray(' Compression-Count -> ') + chalk.bold.red(response.headers['compression-count']) + '\n');
 
 									}
 								}
 
-								// If width or height is defined, pass to request else.. dont.
+								// If either HEIGHT or WIDTH are defined, pass to request
 								if (resize.hasOwnProperty('height') || resize.hasOwnProperty('width')) {
 
 									request.get(body.output.url, {
@@ -428,6 +485,7 @@ if (argv.v || argv.version) {
 
 					// No response error
 					} else {
+
 						log(chalk.bold.red('\u2718 Got no response for ' + file));
 					}
 				}));

@@ -2,7 +2,7 @@
   "name": "xtinypng-cli",
   "nicename": "xTinyPNG CLI",
   "shortname": "xtinypng",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Handy command-line tool for shrinking PNG/JPG images using the TinyPNG API",
   "homepage": "https://github.com/mathieu-aubin/xtinypng-cli",
   "author": "Mathieu Aubin <mathieu@zeroserieux.com>",
@@ -65,7 +65,7 @@
   "scripts": {
     "test": "jshint xtinypng-cli.js && eslint xtinypng-cli.js",
     "prepack": "npm run generate-manual",
-    "generate-manual": "rm -rf man; mkdir man; cp xtinypng-cli.js xtinypng-cli; help2man --name=$npm_package_shortname --section=1 --no-info --version-string=$npm_package_version --manual='xtinypng manual' --help-option=--manual xtinypng-cli | sed 's/DESCRIPTION/USAGE/g' | gzip -9 > man/xtinypng.1.gz; rm xtinypng-cli;"
+    "generate-manual": "rm -rf man; mkdir man; cp xtinypng-cli.js xtinypng-cli; help2man --name=xtinypng --section=1 --no-info --version-string=$npm_package_version --manual='xtinypng manual' --help-option=--manual xtinypng-cli | sed 's/DESCRIPTION/USAGE/g' | gzip -9 > man/xtinypng.1.gz; rm xtinypng-cli;"
   },
   "man": [ "man/xtinypng.1.gz" ]
 }

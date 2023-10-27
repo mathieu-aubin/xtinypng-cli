@@ -65,7 +65,7 @@
   "scripts": {
     "test": "jshint xtinypng-cli.js && eslint xtinypng-cli.js",
     "prepack": "npm run generate-manual",
-    "generate-manual": "rm -rf man; mkdir man; cp xtinypng-cli.js xtinypng-cli; help2man --name=xtinypng --section=1 --no-info --version-string=$npm_package_version --manual='xtinypng manual' --help-option=--manual xtinypng-cli | sed 's/DESCRIPTION/USAGE/g' | gzip -9 > man/xtinypng.1.gz; rm xtinypng-cli;"
+    "generate-manual": "rm -rf man; mkdir man; cp xtinypng-cli.js xtinypng-cli; help2man --name=xtinypng --section=1 --no-info --version-string=$npm_package_version --manual='xtinypng manual' --help-option='--manual' ./xtinypng-cli | sed 's/DESCRIPTION/USAGE/g' | gzip -9 > man/xtinypng.1.gz; rm xtinypng-cli;"
   },
   "man": [ "man/xtinypng.1.gz" ]
 }
